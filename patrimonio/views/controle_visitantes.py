@@ -8,6 +8,7 @@ from django.db.models.functions import Coalesce
 from django.http import JsonResponse, HttpResponse      
 from django.template.loader import render_to_string
 from django.utils import timezone
+from datetime import datetime
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from patrimonio.forms import FornecedorForm, VisitanteForm, EntregaForm, EntradaFornecedorForm, FornecedorPrestadorForm, TrabalhadorCLTForm, PessoaJuridicaForm, MEIForm, AutonomoForm, AssociadoForm, FornecedorServicoForm, QuestionarioIntegracaoForm, CORRECT_ANSWERS
@@ -19,14 +20,15 @@ from datetime import timedelta, datetime
 import secrets
 import base64
 import uuid
+import zoneinfo
 from django.core.paginator import Paginator # 1. Importar Paginator
 from django.db import transaction # Importar transaction (já estava em uso abaixo)
 
 
 @login_required
 def controle_visitantes(request):
-    hoje = timezone.now().date()
-
+    agora_do_sistema = timezone.now()
+    hoje = agora_do_sistema.date()
     # Atualiza status automaticamente
     Fornecedor.objects.filter(integracoes__data_validade__lte=hoje, status='Integrado').update(status='Pendente')
 
@@ -115,13 +117,15 @@ def controle_visitantes(request):
 
         # Marcar saída (esta parte não precisa mudar)
         elif 'submit_saida' in request.POST:
-            entrada_id = request.POST.get('entrada_id')
-            entrada = get_object_or_404(EntradaFornecedor, id=entrada_id)
-            entrada.status = 'Saiu'
-            entrada.horario_saida = timezone.now().time()
-            entrada.save()
-            messages.success(request, "Saída registrada com sucesso!")
-            return redirect('controle_visitantes')
+                    entrada_id = request.POST.get('entrada_id')
+                    entrada = get_object_or_404(EntradaFornecedor, id=entrada_id)
+        
+                    entrada.status = 'Saiu' # AQUI: Não use .time() de novo
+                    entrada.horario_saida = timezone.now().time()
+                    entrada.save()
+                    
+                    messages.success(request, "Saída registrada com sucesso!")
+                    return redirect('controle_visitantes')
             
 
     # --- Fim da lógica POST, início da lógica GET ---
@@ -150,7 +154,6 @@ def controle_visitantes(request):
         'page_obj': page_obj,   # 5. Envia o page_obj para o include 'pagination.html'
     }
     return render(request, 'patrimonio/entrada_saida_visitantes.html', context)
-
 
 @login_required
 def excluir_fornecedor(request, pk):

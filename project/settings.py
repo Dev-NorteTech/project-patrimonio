@@ -26,8 +26,6 @@ SECRET_KEY = 'django-insecure-9xk10&&n1-9c2+!u13e%q(yj9#$48o(b$(2k*72@@s(q2sfksd
 DEBUG = True
 
 ALLOWED_HOSTS = ['portaria.nortesistech.com', '54.156.216.155', '127.0.0.1', 'localhost']
-TIME_ZONE = 'America/Manaus'
-USE_TZ = True
 
 
 
@@ -115,10 +113,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+TIME_ZONE = 'America/Manaus'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
